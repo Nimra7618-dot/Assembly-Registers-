@@ -1,0 +1,219 @@
+;==============================================================================
+; Program: ADD_TWO_NUMBERS.asm
+; Purpose: Add two numbers (10 + 20 = 30) using all 8086 registers
+;==============================================================================
+
+.MODEL SMALL          ; Small memory model
+.STACK 100h           ; Stack size of 256 bytes
+.DATA                 ; Data segment begins
+    RESULT DW 0       ; Variable to store result
+
+.CODE                 ; Code segment begins
+    MAIN PROC         ; Main procedure starts
+    
+        ;======================================================================
+        ; SETUP DATA SEGMENT
+        ;======================================================================
+        
+        ; AX - Accumulator Register
+        ; What: Temporary register to hold data segment address
+        ; Why: Cannot directly move immediate value to DS
+        MOV AX, @DATA      ; AX = address of data segment
+        MOV DS, AX         ; DS = AX (initialize data segment register)
+        
+        ;======================================================================
+        ; SETUP GENERAL PURPOSE REGISTERS
+        ;======================================================================
+        
+        ; AX - Accumulator Register (Primary)
+        ; What: Main register for arithmetic operations
+        ; Why: AX is the primary accumulator in 8086
+        MOV AX, 10         ; AX = 10 (first number to add)
+        
+        ; BX - Base Register
+        ; What: General purpose register, also used for base addressing
+        ; Why: BX can hold the second operand for addition
+        MOV BX, 20         ; BX = 20 (second number to add)
+        
+        ; CX - Counter Register
+        ; What: Used as counter in loops and string operations
+        ; Why: CX is designed to be used as a counter
+        MOV CX, 0          ; CX = 0 (initialize to zero)
+        
+        ; DX - Data Register
+        ; What: General purpose register, used in I/O and arithmetic
+        ; Why: DX can store data temporarily
+        MOV DX, 0          ; DX = 0 (initialize to zero)
+        
+        ;======================================================================
+        ; SETUP INDEX REGISTERS
+        ;======================================================================
+        
+        ; SI - Source Index Register
+        ; What: Used as pointer for source data in string operations
+        ; Why: SI points to source location in memory
+        MOV SI, 0          ; SI = 0 (initialize to zero)
+        
+        ; DI - Destination Index Register
+        ; What: Used as pointer for destination data in string operations
+        ; Why: DI points to destination location in memory
+        MOV DI, 0          ; DI = 0 (initialize to zero)
+        
+        ;======================================================================
+        ; SETUP POINTER REGISTERS
+        ;======================================================================
+        
+        ; BP - Base Pointer Register
+        ; What: Used to reference stack-allocated data and parameters
+        ; Why: BP provides stable reference to stack frame
+        MOV BP, SP         ; BP = SP (set BP to current stack top)
+        
+        ; SP - Stack Pointer Register
+        ; What: Points to top of stack (grows downward)
+        ; Why: SP tracks current stack position
+        ; (SP is already set by .STACK directive)
+        
+        ;======================================================================
+        ; SETUP SEGMENT REGISTERS (Already initialized by assembler)
+        ;======================================================================
+        
+        ; CS - Code Segment Register
+        ; What: Points to code segment containing instructions
+        ; Why: CS holds base address of code segment
+        ; (CS is automatically set by emu8086, do not modify)
+        
+        ; SS - Stack Segment Register
+        ; What: Points to stack segment
+        ; Why: SS holds base address of stack segment
+        ; (SS is automatically set by .STACK directive)
+        
+        ; ES - Extra Segment Register
+        ; What: Additional segment register for string operations
+        ; Why: ES can be used as second data segment
+        MOV AX, DS         ; AX = DS (copy data segment)
+        MOV ES, AX         ; ES = AX (initialize extra segment)
+        
+        ;======================================================================
+        ; PERFORM ADDITION (10 + 20 = 30)
+        ;======================================================================
+        
+        ; Main Addition using AX and BX
+        ; What: AX = AX + BX
+        ; Why: AX is accumulator, BX holds second operand
+        ADD AX, BX         ; AX = 10 + 20 = 30
+        
+        ; Copy result to CX
+        ; What: CX = AX
+        ; Why: Store backup of result in CX
+        MOV CX, AX         ; CX = 30
+        
+        ; Copy result to DX
+        ; What: DX = AX
+        ; Why: Store backup of result in DX
+        MOV DX, AX         ; DX = 30
+        
+        ; Copy result to SI
+        ; What: SI = AX
+        ; Why: Store in source index register
+        MOV SI, AX         ; SI = 30
+        
+        ; Copy result to DI
+        ; What: DI = AX
+        ; Why: Store in destination index register
+        MOV DI, AX         ; DI = 30
+        
+        ;======================================================================
+        ; STORE RESULT TO MEMORY
+        ;======================================================================
+        
+        ; Store using direct addressing
+        ; What: RESULT = AX
+        ; Why: Direct variable assignment
+        MOV RESULT, AX     ; RESULT = 30 (store in memory variable)
+        
+        ; Store using BX as pointer (register indirect)
+        ; What: [BX] = AX
+        ; Why: BX can be used as pointer to memory
+        MOV BX, OFFSET RESULT  ; BX = address of RESULT
+        MOV [BX], AX       ; Memory[BX] = AX (30)
+        
+        ; Store using SI as pointer
+        ; What: [SI] = AX
+        ; Why: SI can be used as pointer to memory
+        MOV SI, OFFSET RESULT  ; SI = address of RESULT
+        MOV [SI], AX       ; Memory[SI] = AX (30)
+        
+        ; Store using DI as pointer
+        ; What: [DI] = AX
+        ; Why: DI can be used as pointer to memory
+        MOV DI, OFFSET RESULT  ; DI = address of RESULT
+        MOV [DI], AX       ; Memory[DI] = AX (30)
+        
+        ; Store using BP with offset (stack-relative)
+        ; What: [BP-2] = AX
+        ; Why: BP points to stack, BP-2 accesses local storage
+        PUSH AX            ; Push AX to stack
+        POP BX             ; Pop to BX (restore)
+        MOV [BP-2], BX     ; Memory[BP-2] = BX (30)
+        
+        ;======================================================================
+        ; USE ALL REGISTER BYTES (AH, AL, BH, BL, CH, CL, DH, DL)
+        ;======================================================================
+        
+        ; Use AH and AL (high and low bytes of AX)
+        ; What: AH = 30 / 256, AL = 30 mod 256
+        ; Why: AX can be accessed as two 8-bit registers
+        MOV AH, 0          ; AH = 0 (high byte of AX)
+        MOV AL, 30         ; AL = 30 (low byte of AX)
+        
+        ; Use BH and BL (high and low bytes of BX)
+        ; What: BH = 0, BL = 30
+        ; Why: BX can be accessed as two 8-bit registers
+        MOV BH, 0          ; BH = 0 (high byte of BX)
+        MOV BL, 30         ; BL = 30 (low byte of BX)
+        
+        ; Use CH and CL (high and low bytes of CX)
+        ; What: CH = 0, CL = 30
+        ; Why: CX can be accessed as two 8-bit registers
+        MOV CH, 0          ; CH = 0 (high byte of CX)
+        MOV CL, 30         ; CL = 30 (low byte of CX)
+        
+        ; Use DH and DL (high and low bytes of DX)
+        ; What: DH = 0, DL = 30
+        ; Why: DX can be accessed as two 8-bit registers
+        MOV DH, 0          ; DH = 0 (high byte of DX)
+        MOV DL, 30         ; DL = 30 (low byte of DX)
+        
+        ;======================================================================
+        ; RESTORE REGISTERS
+        ;======================================================================
+        
+        ; Restore original values
+        MOV AX, 30         ; AX = 30
+        MOV BX, 20         ; BX = 20
+        MOV CX, 0          ; CX = 0
+        MOV DX, 0          ; DX = 0
+        MOV SI, 0          ; SI = 0
+        MOV DI, 0          ; DI = 0
+        
+        ;======================================================================
+        ; TERMINATE PROGRAM
+        ;======================================================================
+        
+        ; AH - High byte of AX (DOS function number)
+        ; What: AH = 4Ch (DOS function to terminate program)
+        ; Why: AH holds the DOS interrupt function code
+        MOV AH, 4CH        ; AH = 4Ch (terminate function)
+        
+        ; AL - Low byte of AX (Return code)
+        ; What: AL = 00 (return code = success)
+        ; Why: AL holds the program exit code
+        MOV AL, 00         ; AL = 0 (exit code = success)
+        
+        ; INT 21h - DOS Interrupt
+        ; What: Call DOS to terminate program
+        ; Why: INT 21h with AH=4Ch exits the program
+        INT 21H            ; DOS interrupt - exit program
+        
+    MAIN ENDP          ; End of main procedure
+END MAIN              ; End of program
